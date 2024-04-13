@@ -1,7 +1,7 @@
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 from lexicon.lexicon import LEXICON
-from servises.file_handling import book
+from servises import my_book
 
 
 def create_bookmarks_keyboard(*args: int) -> InlineKeyboardMarkup:
@@ -10,7 +10,7 @@ def create_bookmarks_keyboard(*args: int) -> InlineKeyboardMarkup:
     # Наполняем клавиатуру кнопками-закладками в порядке возрастания
     for button in sorted(args):
         kb_builder.row(InlineKeyboardButton(
-            text=f'{button} - {book[button][:100]}',
+            text=f'{button} - {my_book[button][:100]}',
             callback_data=str(button)
         ))
     # Добавляем в клавиатуру в конце две кнопки "Редактировать" и "Отменить"
@@ -34,7 +34,7 @@ def create_edit_keyboard(*args: int) -> InlineKeyboardMarkup:
     # Наполняем клавиатуру кнопками-закладками в порядке возрастания
     for button in sorted(args):
         kb_builder.row(InlineKeyboardButton(
-            text=f'{LEXICON["del"]} {button} - {book[button][:100]}',
+            text=f'{LEXICON["del"]} {button} - {my_book[button][:100]}',
             callback_data=f'{button}del'
         ))
     # Добавляем в конец клавиатуры кнопку "Отменить"

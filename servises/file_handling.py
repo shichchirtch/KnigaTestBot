@@ -1,11 +1,11 @@
 import os
 import sys
-from pprint import pprint as pp
-
+# from database import users_db
+# from keyboards import create_pagination_keyboard
 BOOK_PATH = 'book/БотКнигаЭкзампл.txt'
 PAGE_SIZE = 1050
 
-book: dict[int, str] = {}
+my_book: dict[int, str] = {}
 
 
 # Функция, возвращающая строку с текстом страницы и ее размер
@@ -41,10 +41,12 @@ def prepare_book(path: str = BOOK_PATH) -> None:
         for letter in range(start, len(str_file), PAGE_SIZE):
             page = _get_part_text(str_file, start, PAGE_SIZE)
             count += 1
-            book[count] = page[0].lstrip()
+            my_book[count] = page[0].lstrip()
             start += page[1]
 
 
 # Вызов функции prepare_book для подготовки книги из текстового файла
 # print(os.path.join(sys.path[0], os.path.normpath(BOOK_PATH)))
 prepare_book(os.path.join(sys.path[0], os.path.normpath(BOOK_PATH)))
+
+

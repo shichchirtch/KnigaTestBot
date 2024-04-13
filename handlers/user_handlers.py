@@ -5,12 +5,12 @@ from aiogram import F, Router
 from aiogram.filters import Command, CommandStart
 from aiogram.types import CallbackQuery, Message
 from database.database import user_dict_template, users_db
-from filters.filters import IsDelBookmarkCallbackData, IsDigitCallbackData
+from filters import *
 from keyboards.bookmarks_kb import (create_bookmarks_keyboard,
                                     create_edit_keyboard)
-from keyboards import create_pagination_keyboard
+from keyboards import create_pagination_keyboard, create_three_button_kbd
 from lexicon import LEXICON
-from servises import book
+from servises import *
 
 Lese_router = Router()
 
@@ -18,43 +18,25 @@ Lese_router = Router()
 
 # Этот хэндлер будет срабатывать на нажатие инлайн-кнопки "вперед"
 # во время взаимодействия пользователя с сообщением-книгой
-@Lese_router.callback_query(F.data == 'forward')
-async def process_forward_press(callback: CallbackQuery):
-    if users_db[callback.from_user.id]['page'] < len(book):
-        users_db[callback.from_user.id]['page'] += 1
-        current_text = book[users_db[callback.from_user.id]['page']]
-        await callback.message.edit_text(
-            text=current_text,
-            reply_markup=create_pagination_keyboard(
-                'backward',
-                f'{users_db[callback.from_user.id]["page"]}/{len(book)}',
-                'forward'
-            )
+@Lese_router.callback_query(MOVE_PAGE())
+async def page_moving(callback: CallbackQuery):
+    print(f'{callback.data = }')
+    shift = -1 if callback.data == 'backward' else 1
+    user_id = callback.from_user.id
+    users_db[user_id]['page'] += shift
+    current_text = my_book[users_db[callback.from_user.id]['page']]
+    await callback.message.edit_text(
+        text=current_text,
+        reply_markup=create_pagination_keyboard( users_db[user_id]['page']
         )
+    )
     await callback.answer()
 
-
-# Этот хэндлер будет срабатывать на нажатие инлайн-кнопки "назад"
-# во время взаимодействия пользователя с сообщением-книгой
-@Lese_router.callback_query(F.data == 'backward')
-async def process_backward_press(callback: CallbackQuery):
-    if users_db[callback.from_user.id]['page'] > 1:
-        users_db[callback.from_user.id]['page'] -= 1
-        current_text = book[users_db[callback.from_user.id]['page']]
-        await callback.message.edit_text(
-            text=current_text,
-            reply_markup=create_pagination_keyboard(
-                'backward',
-                f'{users_db[callback.from_user.id]["page"]}/{len(book)}',
-                'forward'
-            )
-        )
-    await callback.answer()
 
 
 # Этот хэндлер будет срабатывать на нажатие инлайн-кнопки
 # с номером текущей страницы и добавлять текущую страницу в закладки
-@Lese_router.callback_query(lambda x: '/' in x.data and x.data.replace('/', '').isdigit())
+@Lese_router.callback_query(lambda x: '/' in x.data and x.data.replace(' / ', '').isdigit())
 async def process_page_press(callback: CallbackQuery):
     users_db[callback.from_user.id]['bookmarks'].add(
         users_db[callback.from_user.id]['page']
@@ -66,14 +48,11 @@ async def process_page_press(callback: CallbackQuery):
 # с закладкой из списка закладок
 @Lese_router.callback_query(IsDigitCallbackData())
 async def process_bookmark_press(callback: CallbackQuery):
-    zakladka_text = book[int(callback.data)]
+    zakladka_text = my_book[int(callback.data)]
     users_db[callback.from_user.id]['page'] = int(callback.data)
     await callback.message.edit_text(
         text=zakladka_text,
-        reply_markup=create_pagination_keyboard(
-            'backward',
-            f'{users_db[callback.from_user.id]["page"]}/{len(book)}',
-            'forward'
+        reply_markup=create_pagination_keyboard(users_db[callback.from_user.id]["page"]
         )
     )
     await callback.answer()
@@ -108,12 +87,12 @@ async def process_del_bookmark_press(callback: CallbackQuery):
         int(callback.data[:-3])
     )
     if users_db[callback.from_user.id]['bookmarks']:
-        await callback.message.edit_text(
-            text=LEXICON['/bookmarks'],
-            reply_markup=create_edit_keyboard(
-                *users_db[callback.from_user.id]["bookmarks"]
-            )
-        )
+        await (
+                callback.message.edit_text(
+                text=LEXICON['/bookmarks'],
+                reply_markup=create_edit_keyboard(
+                    *users_db[callback.from_user.id]["bookmarks"]
+            )))
     else:
         await callback.message.edit_text(text=LEXICON['no_bookmarks'])
     await callback.answer()
