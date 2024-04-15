@@ -1,7 +1,6 @@
 import os
 import sys
-# from database import users_db
-# from keyboards import create_pagination_keyboard
+
 BOOK_PATH = 'book/БотКнигаЭкзампл.txt'
 PAGE_SIZE = 1050
 
@@ -18,7 +17,7 @@ def _get_part_text(text: str, start: int, size: int = PAGE_SIZE) -> tuple[str, i
     #  Проверяю, чтобы страница была меньше остатка текста и чтобы символ,
     #  следующий за концом страницы был в наборе знаков препинания
     if len(text[start:start + size]) < rest_text and text[start + size] in kit:
-        page_size = size - 2  # если это так - уменьшаю размер странцы на 2,
+        size = size - 2  # если это так - уменьшаю размер странцы на 2,
         # потому что только многоточие имеет длину 3
         # хорошо что не было много смйликов)))))
     main_chunk = text[start: start + size]  # вырезаю кусок текста под страницу
@@ -39,10 +38,10 @@ def prepare_book(path: str = BOOK_PATH) -> None:
         str_file = file.read()
         start = count = 0
         for letter in range(start, len(str_file), PAGE_SIZE):
-            page = _get_part_text(str_file, start, PAGE_SIZE)
+            page_text, sinboll_index = _get_part_text(str_file, start, PAGE_SIZE)
             count += 1
-            my_book[count] = page[0].lstrip()
-            start += page[1]
+            my_book[count] = page_text.lstrip()
+            start += sinboll_index
 
 
 # Вызов функции prepare_book для подготовки книги из текстового файла

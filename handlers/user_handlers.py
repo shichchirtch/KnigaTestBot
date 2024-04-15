@@ -1,16 +1,11 @@
-
-from copy import deepcopy
-
 from aiogram import F, Router
-from aiogram.filters import Command, CommandStart
-from aiogram.types import CallbackQuery, Message
-from database.database import user_dict_template, users_db
 from filters import *
-from keyboards.bookmarks_kb import (create_bookmarks_keyboard,
-                                    create_edit_keyboard)
-from keyboards import create_pagination_keyboard, create_three_button_kbd
+from keyboards.bookmarks_kb import create_edit_keyboard
+from keyboards import create_pagination_keyboard
 from lexicon import LEXICON
 from servises import *
+from aiogram.types import CallbackQuery, Message
+from database.database import user_dict_template, users_db
 
 Lese_router = Router()
 
@@ -91,8 +86,7 @@ async def process_del_bookmark_press(callback: CallbackQuery):
                 callback.message.edit_text(
                 text=LEXICON['/bookmarks'],
                 reply_markup=create_edit_keyboard(
-                    *users_db[callback.from_user.id]["bookmarks"]
-            )))
+                    *users_db[callback.from_user.id]["bookmarks"])))
     else:
         await callback.message.edit_text(text=LEXICON['no_bookmarks'])
     await callback.answer()

@@ -1,5 +1,6 @@
 from aiogram import Router
 from aiogram.types import Message
+from servises import my_book
 
 Other_router = Router()
 
@@ -8,4 +9,7 @@ Other_router = Router()
 # не предусмотренные логикой работы бота
 @Other_router.message()
 async def send_echo(message: Message):
-    await message.reply(f'Это эхо! {message.text}')
+    if message.text.isdigit():
+        await message.reply(f'В книге только  <b>{len(my_book)}</b>  страниц')
+    if message.text.isalpha():
+        await message.reply(f'Давайте лучше продолжим чтение ?')
